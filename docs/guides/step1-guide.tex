@@ -1,0 +1,687 @@
+% Step 1 guide: Mileti's formulas in Lean 4 (beginner edition)
+% Build:  cd docs/guides && lualatex step1-guide.tex && lualatex step1-guide.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{fontspec}
+\directlua{luaotfload.add_fallback("fb",{"STIXTwoMath-Regular.otf:mode=node;"})}
+\setmainfont{DejaVuSerif.ttf}[RawFeature={fallback=fb},BoldFont=DejaVuSerif-Bold.ttf,ItalicFont=DejaVuSerif-Italic.ttf,Scale=0.92]
+\setsansfont{DejaVuSans.ttf}[RawFeature={fallback=fb},BoldFont=DejaVuSans-Bold.ttf]
+\setmonofont{DejaVuSansMono.ttf}[RawFeature={fallback=fb},BoldFont=DejaVuSansMono-Bold.ttf,Scale=0.82]
+\usepackage{xcolor}
+\usepackage{fvextra}
+\usepackage[most]{tcolorbox}
+\usepackage{booktabs,tabularx,array}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+
+\definecolor{accent}{HTML}{1F5FA8}
+\definecolor{codebg}{HTML}{F5F7FA}
+\definecolor{outbg}{HTML}{EEF6EE}
+\definecolor{tipc}{HTML}{1F5FA8}
+\definecolor{okc}{HTML}{2E7D32}
+\definecolor{warnc}{HTML}{B26A00}
+\definecolor{tryc}{HTML}{6A1B9A}
+
+\titleformat{\section}{\sffamily\Large\bfseries\color{accent}}{Part \thesection}{0.8em}{}
+\titleformat{\subsection}{\sffamily\large\bfseries}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\sffamily\normalsize\bfseries}{}{0em}{}
+\setcounter{section}{-1}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\sffamily\small Step 1: Mileti's formulas in Lean}
+\fancyhead[R]{\sffamily\small mileti-kg-prover}
+\fancyfoot[C]{\sffamily\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+\DefineVerbatimEnvironment{lean}{Verbatim}{fontsize=\small,breaklines,frame=leftline,framerule=2pt,rulecolor=\color{accent},xleftmargin=4pt,framesep=8pt}
+\DefineVerbatimEnvironment{shell}{Verbatim}{fontsize=\small,breaklines,frame=leftline,framerule=2pt,rulecolor=\color{gray},xleftmargin=4pt,framesep=8pt}
+\DefineVerbatimEnvironment{output}{Verbatim}{fontsize=\small,breaklines,frame=leftline,framerule=2pt,rulecolor=\color{okc},xleftmargin=4pt,framesep=8pt}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\newtcolorbox{tip}[1][Tip]{enhanced,breakable,colback=tipc!5,colframe=tipc,fonttitle=\sffamily\bfseries,title={#1},boxrule=0.6pt,arc=2pt}
+\newtcolorbox{okbox}[1][Check]{enhanced,breakable,colback=okc!5,colframe=okc,fonttitle=\sffamily\bfseries,title={✓\ #1},boxrule=0.6pt,arc=2pt}
+\newtcolorbox{warn}[1][Watch out]{enhanced,breakable,colback=warnc!6,colframe=warnc,fonttitle=\sffamily\bfseries,title={#1},boxrule=0.6pt,arc=2pt}
+\newtcolorbox{try}[1][Try it yourself]{enhanced,breakable,colback=tryc!5,colframe=tryc,fonttitle=\sffamily\bfseries,title={#1},boxrule=0.6pt,arc=2pt}
+
+\setlist{itemsep=2pt,topsep=4pt}
+
+\begin{document}
+
+\begin{titlepage}
+\vspace*{3cm}
+{\sffamily\color{accent}\Huge\bfseries Step 1: Mileti's formulas in Lean 4\par}
+\vspace{0.6cm}
+{\sffamily\Large A beginner's guide to the first part of the project\par}
+\vspace{1.2cm}
+{\large Project: \emph{Legal moves and book knowledge: can LLMs build textbook deductions that Lean accepts?}\par}
+\vspace{0.4cm}
+{\large Repository: \code{github.com/ZaDrMeister/mileti-kg-prover}\par}
+\vspace{2cm}
+\begin{tcolorbox}[colback=accent!4,colframe=accent,boxrule=0.6pt,arc=2pt]
+\textbf{What you'll have at the end}
+\begin{itemize}
+\item \code{lean/MiletiLogic/Syntax.lean}, written by you: Mileti's propositional formulas as a Lean type, with readable notation and two recursive functions, all checked by Lean.
+\item Your first commits on GitHub.
+\item Your first research-diary entries.
+\end{itemize}
+\textbf{Time:} about 6--8 hours, split over three days (see the plan on page \pageref{plan}).\\[4pt]
+\textbf{Assumes:} no Lean experience, basic programming (you've used Python or Java), and Mileti Ch.~2--3 at hand.
+\end{tcolorbox}
+\vfill
+{\small Written 2026-11-25. Every Lean snippet in this guide was compiled with Lean v4.28.0, the version in your project. If a snippet fails for you, look for a typo or a setup problem first.\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ------------------------------------------------------------------
+\section{Before you start}
+
+\subsection{The one rule}
+\textbf{You write everything in \code{Syntax.lean}.} This guide teaches with \emph{other} examples (colors, shapes, arithmetic expressions) that have the same structure as formulas. Your job is to translate them. That's on purpose:
+\begin{itemize}
+\item The project's main claim is that \emph{you} formalized Mileti's system. PhD interviewers will ask you to explain your code line by line.
+\item Translating an example is where the learning happens. Copying doesn't teach you anything.
+\end{itemize}
+When you're stuck, ask Claude \emph{what an error means} or \emph{for a hint}. Don't ask for the code.
+
+\subsection{How to read this guide}
+Each part uses these boxes:
+
+\begin{tip}[Tip] Extra explanation or a shortcut. \end{tip}
+\begin{try} A small exercise in your scratch file. Do it: each one prepares a piece of your real file. \end{try}
+\begin{okbox}[Check] How to know a step worked. Don't go on until it passes. \end{okbox}
+\begin{warn} A common mistake. \end{warn}
+
+Code you type looks like this (blue bar):
+\begin{lean}
+#eval 2 + 3
+\end{lean}
+What Lean shows back looks like this (green bar):
+\begin{output}
+5
+\end{output}
+Terminal commands have a grey bar:
+\begin{shell}
+cd ~/Desktop/grad-school-project/mileti-kg-prover
+\end{shell}
+
+\subsection{The three-day plan}\label{plan}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}Xl@{}}
+\toprule
+\textbf{Day} & \textbf{Parts} & \textbf{Time}\\
+\midrule
+Day 1 & Part 1 (why) + Part 2 (setup) + Lessons A--C in Part 3 & 2--2.5 h\\
+Day 2 & Lessons D--F in Part 3 + Part 4 (reading Mileti) & 2--2.5 h\\
+Day 3 & Part 5 (build \code{Syntax.lean}) + Part 6 (finish and commit) & 2--3 h\\
+\bottomrule
+\end{tabularx}
+\end{center}
+End every day with a diary entry (Part 8). It takes 10 minutes.
+
+% ------------------------------------------------------------------
+\section{What you're building, and why}
+
+\subsection{Formulas in Mileti}
+In Mileti (Ch.~2 and §3.1), a \textbf{formula} of propositional logic is built from:
+\begin{itemize}
+\item \textbf{atoms}: propositional symbols such as $A$, $B$, $C$ (the book uses a set $P$ of them);
+\item \textbf{connectives} that build bigger formulas from smaller ones: $\neg\varphi$, $\varphi\wedge\psi$, $\varphi\vee\psi$, $\varphi\to\psi$.
+\end{itemize}
+Mileti defines the set of formulas with a \textbf{generating system}: start with the atoms, keep applying the connectives, and take everything you can reach. He writes formulas as \emph{strings} in Polish (prefix) notation, for example \code{∧AB} for $A\wedge B$. Because strings could in principle be read in more than one way, the book has to \emph{prove} \textbf{unique readability}: every formula is built in exactly one way.
+
+\subsection{Formulas in Lean: trees}
+In Lean you don't use strings. You describe formulas as \textbf{trees}:
+\begin{center}
+\begin{BVerbatim}
+          →            this tree is  (A ∧ B) → (A ∨ B)
+        /   \
+       ∧     ∨         the top node is the "main connective"
+      / \   / \
+     A   B A   B       the leaves are atoms
+\end{BVerbatim}
+\end{center}
+Lean's \code{inductive} keyword creates exactly this kind of tree type. Lean \emph{guarantees} two things about it:
+\begin{enumerate}
+\item Trees built with different constructors are different (an $\wedge$-tree is never an $\vee$-tree).
+\item Each constructor is one-to-one: if $\varphi_1\wedge\psi_1$ and $\varphi_2\wedge\psi_2$ are the same tree, then $\varphi_1=\varphi_2$ and $\psi_1=\psi_2$.
+\end{enumerate}
+Those are exactly Mileti's \textbf{freeness} conditions for a generating system. So with an inductive type, \emph{unique readability holds automatically}. That's the first insight of the project, and you'll write it up in your own words in Part~4.
+
+\subsection{Where step 1 fits}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Step} & \textbf{What}\\
+\midrule
+\textbf{1 (this guide)} & \code{Formula}: what a formula \emph{is}\\
+2 & \code{Derivable}: Mileti's 14 deduction rules (§3.4), built on \code{Formula}\\
+3 & Python gates: one per rule, the legal-move check\\
+later & the LLM loop, the Lean check of every proof, experiments (conditions A, B, D, E, W)\\
+\bottomrule
+\end{tabularx}
+\end{center}
+Everything later depends on \code{Formula}, so it's worth getting it right.
+
+% ------------------------------------------------------------------
+\section{Setup (30 minutes)}
+
+\subsection{Open Terminal and check that Lean works}
+Open the \textbf{Terminal} app (⌘+Space, type ``Terminal'', Enter). Type each line and press Enter:
+\begin{shell}
+cd ~/Desktop/grad-school-project/mileti-kg-prover/lean
+~/.elan/bin/lake build
+\end{shell}
+\code{cd} means ``change directory'' (go into that folder). \code{lake} is Lean's build tool: it checks every Lean file in the project.
+\begin{okbox}
+You see \code{Build completed successfully}. The first run can take a minute.
+\end{okbox}
+\begin{warn}[If it fails]
+Copy the \emph{whole} output and ask Claude what it means. Don't continue until the build works.
+\end{warn}
+
+\subsection{Install the Lean extension in VS Code}
+\begin{enumerate}
+\item Open VS Code.
+\item Open the Extensions panel: ⇧⌘X (Shift+Command+X).
+\item Search \textbf{lean4}. Install the one published by \textbf{leanprover}.
+\item Restart VS Code if it asks you to.
+\end{enumerate}
+
+\subsection{Open the right folder}
+\textbf{File → Open Folder…} and choose
+\code{\textasciitilde/Desktop/grad-school-project/mileti-kg-prover/lean}.
+\begin{warn}
+Open the \code{lean} folder itself, not the whole project. The Lean extension looks for \code{lakefile.lean} in the folder you open. With the wrong folder, Lean can't find your files and the infoview stays empty.
+\end{warn}
+
+\subsection{The infoview: where Lean talks to you}
+Open \code{MiletiLogic/Syntax.lean} from the sidebar. Then open the infoview: press ⇧⌘P, type \code{Lean 4: Infoview: Toggle}, and press Enter. A panel opens on the right.
+
+The infoview shows, for the line your cursor is on:
+\begin{itemize}
+\item results of \code{\#eval} and \code{\#check};
+\item \textbf{errors} (also underlined in red in the editor);
+\item later (step 2), the \emph{goal} you're proving.
+\end{itemize}
+Errors also appear in VS Code's \textbf{Problems} panel (⇧⌘M).
+
+\subsection{Make a scratch file}
+Create a new file and save it as \code{lean/Scratch.lean}. That's where you'll practise. It's already listed in \code{.gitignore}, so git ignores it. Type:
+\begin{lean}
+#eval 2 + 3
+\end{lean}
+Put the cursor on that line.
+\begin{okbox}
+The infoview shows \code{5}. Your setup works.
+\end{okbox}
+
+\subsection{Typing logic symbols}
+The Lean extension turns backslash codes into symbols. Type the code, then a space:
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Type} & \textbf{Get} & \textbf{Type} & \textbf{Get}\\
+\midrule
+\code{\textbackslash to} & → & \code{\textbackslash ne} & ≠\\
+\code{\textbackslash and} & ∧ & \code{\textbackslash phi} & φ\\
+\code{\textbackslash or} & ∨ & \code{\textbackslash psi} & ψ\\
+\code{\textbackslash not} & ¬ & \code{\textbackslash sim} & ∼\\
+\code{\textbackslash bigwedge} & ⋀ & \code{\textbackslash bigvee} & ⋁\\
+\code{\textbackslash longrightarrow} & ⟶ & \code{\textbackslash vdash} & ⊢\\
+\bottomrule
+\end{tabular}
+\end{center}
+Hover over any symbol in the editor to see how to type it.
+
+% ------------------------------------------------------------------
+\section{A Lean crash course in six lessons}
+Do every lesson in \code{Scratch.lean}. \textbf{Type the examples; don't paste them.} Typing is how the syntax sticks. After each block, put your cursor on the \code{\#eval} lines and compare the infoview with the green output shown here.
+
+\subsection{Lesson A: values, functions, checks (20 min)}
+\begin{lean}
+#eval 2 + 3                        -- run code
+#eval "hello " ++ "Lean"           -- ++ joins strings
+#check Nat                         -- what type is this?
+#check (2 + 2 = 4)                 -- a statement is also something with a type
+
+def double (n : Nat) : Nat := n + n
+#eval double 21
+#check double
+
+example : double 2 = 4 := by rfl
+\end{lean}
+\begin{output}
+5
+"hello Lean"
+Nat : Type
+2 + 2 = 4 : Prop
+42
+double (n : Nat) : Nat
+\end{output}
+\textbf{Line by line:}
+\begin{itemize}
+\item \code{--} starts a comment. Lean ignores the rest of the line.
+\item \code{\#eval} \emph{runs} something and shows the result. \code{\#check} shows its \emph{type}. Commands starting with \code{\#} are for you; they don't become part of the program.
+\item \code{Nat} is the type of natural numbers $0,1,2,\dots$ \code{Prop} is the type of \emph{statements}. In Lean, ``$2+2=4$'' is a thing of type \code{Prop}. That's how Lean will later talk about ``$S\vdash\varphi$ is derivable''.
+\item \code{def double (n : Nat) : Nat := n + n} reads: ``define \code{double}; it takes an input \code{n} of type \code{Nat}, returns a \code{Nat}, and the result is \code{n + n}.'' The pattern is always \code{def name (input : Type) : OutputType := body}.
+\item \code{example : double 2 = 4 := by rfl} asks Lean to \emph{check} a fact. \code{rfl} (reflexivity) means ``compute both sides; they're the same.'' If the fact is false, you get a red error and no output.
+\end{itemize}
+\begin{try}
+\begin{enumerate}
+\item Write \code{def triple (n : Nat) : Nat := …} and \code{example : triple 3 = 9 := by rfl}.
+\item Change \code{9} to \code{10}. Read the error message, then change it back.
+\end{enumerate}
+\end{try}
+
+\subsection{Lesson B: your first \texttt{inductive} type (20 min)}
+\begin{lean}
+inductive Color where
+  | red
+  | green
+  | blue
+  deriving Repr, DecidableEq
+
+#eval Color.red
+example : Color.red ≠ Color.blue := by decide
+
+def Color.next : Color → Color
+  | .red   => .green
+  | .green => .blue
+  | .blue  => .red
+
+#eval Color.red.next
+\end{lean}
+\begin{output}
+Color.red
+Color.green
+\end{output}
+\textbf{Line by line:}
+\begin{itemize}
+\item \code{inductive Color where} creates a new type. Each line starting with \code{|} is a \textbf{constructor}: one of the \emph{only} ways to make a \code{Color}. Nothing else is a \code{Color}.
+\item \code{deriving Repr} lets \code{\#eval} \emph{print} a value of this type.
+\item \code{deriving DecidableEq} lets Lean \emph{decide} whether two values are equal. \code{by decide} uses it. \textbf{You'll need both for formulas}: the gates and Lean must be able to ask ``is this formula the same as that one?''
+\item \code{Color → Color} is the type ``function from Color to Color''.
+\item The function is defined by \textbf{pattern matching}: one line per constructor. \code{.red} is short for \code{Color.red}; Lean knows the input is a \code{Color}.
+\item \code{Color.red.next} is the same as \code{Color.next Color.red}. Naming the function \code{Color.next} lets you use the dot form.
+\end{itemize}
+\begin{try}
+Add a fourth constructor \code{| yellow} to \code{Color}. Lean now marks \code{Color.next} with \code{Missing cases}. Fix it so the colors cycle red → green → blue → yellow → red, and check that \code{\#eval Color.yellow.next} shows \code{Color.red}.
+\end{try}
+\begin{tip}[Why \texttt{Missing cases} is good news]
+Lean refuses functions that forget a case. When you have a function over all formulas (or, in step 2, over all 14 rules), Lean will tell you if you forgot one.
+\end{tip}
+
+\subsection{Lesson C: constructors that carry data (15 min)}
+\begin{lean}
+inductive Shape where
+  | circle : Nat → Shape          -- a circle needs one number (radius)
+  | rect   : Nat → Nat → Shape    -- a rectangle needs two numbers
+  deriving Repr, DecidableEq
+
+#eval Shape.rect 2 3
+
+def Shape.area : Shape → Nat
+  | .circle r => 3 * r * r        -- name the data: r
+  | .rect w h => w * h
+
+#eval (Shape.rect 2 3).area
+\end{lean}
+\begin{output}
+Shape.rect 2 3
+6
+\end{output}
+\textbf{Line by line:}
+\begin{itemize}
+\item \code{circle : Nat → Shape} reads: ``give me a \code{Nat}, I give you a \code{Shape}.''
+\item \code{rect : Nat → Nat → Shape} reads: ``give me two \code{Nat}s, I give you a \code{Shape}.'' The arrows chain: the last type is the result, the others are inputs.
+\item In the match, \code{.circle r} \emph{names} the number inside the circle \code{r}, so the right side can use it.
+\end{itemize}
+\begin{tip}[Connection to Mileti]
+An \textbf{atom} is like \code{circle}: a constructor carrying a \emph{name} (a number or a string), not another formula. In Part~5 you'll decide which.
+\end{tip}
+
+\subsection{Lesson D: lists (15 min)}
+Your \code{subformulas} function will return a \emph{list} of formulas, so learn lists first.
+\begin{lean}
+#eval [1, 2] ++ [3]              -- join two lists
+#eval 0 :: [1, 2]                -- put one item at the front
+#eval [1, 2, 3].length
+#eval [1, 1, 2].eraseDups        -- remove duplicates
+#eval [1, 2, 3].contains 2
+\end{lean}
+\begin{output}
+[1, 2, 3]
+[0, 1, 2]
+3
+[1, 2]
+true
+\end{output}
+\begin{itemize}
+\item \code{[a, b, c]} is a list. \code{List Nat} is the type ``list of natural numbers''; \code{List Formula} will be ``list of formulas''.
+\item \code{x :: xs} is ``x, then the list xs''. \code{xs ++ ys} joins two lists.
+\item Lists keep \emph{order} and \emph{duplicates}. Sets don't. You'll decide which one matches Mileti's subformulas.
+\end{itemize}
+
+\subsection{Lesson E: a type that contains itself (a tree). The key lesson (45 min)}
+This has exactly the shape you need for formulas, but for arithmetic expressions. \textbf{Spend the most time here.}
+\begin{lean}
+namespace Demo
+
+inductive Expr where
+  | num   : Nat → Expr               -- base case: like an atom
+  | neg   : Expr → Expr              -- one smaller Expr inside: like ¬
+  | plus  : Expr → Expr → Expr       -- two smaller Exprs: like ∧, ∨, →
+  | times : Expr → Expr → Expr
+  deriving DecidableEq, Repr
+
+open Expr      -- now `num 1` works instead of `Expr.num 1`
+
+def size : Expr → Nat               -- number of nodes in the tree
+  | num _     => 1                   -- _ : "some data I don't need"
+  | neg e     => size e + 1          -- calls itself on the smaller part
+  | plus a b  => size a + size b + 1
+  | times a b => size a + size b + 1
+
+def height : Expr → Nat             -- longest path from the top down
+  | num _     => 0
+  | neg e     => height e + 1
+  | plus a b  => max (height a) (height b) + 1
+  | times a b => max (height a) (height b) + 1
+
+def subexprs : Expr → List Expr     -- every piece, including the whole
+  | num n     => [num n]
+  | neg e     => neg e :: subexprs e
+  | plus a b  => plus a b :: (subexprs a ++ subexprs b)
+  | times a b => times a b :: (subexprs a ++ subexprs b)
+
+#eval size (plus (num 1) (neg (num 2)))
+#eval height (plus (num 1) (neg (num 2)))
+#eval subexprs (plus (num 1) (num 1))
+#eval (subexprs (plus (num 1) (num 1))).eraseDups
+
+example : plus (num 1) (num 2) ≠ plus (num 2) (num 1) := by decide
+
+end Demo
+\end{lean}
+\begin{output}
+4
+2
+[Demo.Expr.plus (Demo.Expr.num 1) (Demo.Expr.num 1), Demo.Expr.num 1, Demo.Expr.num 1]
+[Demo.Expr.plus (Demo.Expr.num 1) (Demo.Expr.num 1), Demo.Expr.num 1]
+\end{output}
+\textbf{What's new, carefully:}
+\begin{itemize}
+\item \code{neg : Expr → Expr}: a constructor can take \emph{another} \code{Expr}. That makes \code{Expr} a \textbf{tree}: \code{plus (num 1) (neg (num 2))} is the tree with $+$ on top, $1$ on the left and $-2$ on the right.
+\item \textbf{Recursion.} \code{size} calls \code{size} on the smaller parts. Lean accepts this because the parts are \emph{structurally smaller} (they're inside the tree), so the recursion must end. This is the same as Mileti's ``definition by recursion on formulas'', and it's why Mileti needs freeness: in a free system, recursive definitions are well-defined.
+\item \textbf{Work through \code{size} by hand once:}
+\[\code{size}(\code{plus}(1, \code{neg}(2))) = \code{size}(1) + \code{size}(\code{neg}(2)) + 1 = 1 + (1+1) + 1 = 4.\]
+\item \code{namespace Demo … end Demo} groups names: inside, \code{Expr} is really \code{Demo.Expr}. Your file uses \code{namespace MiletiLogic}.
+\item The \code{example … ≠ … := by decide} shows that $1+2$ and $2+1$ are \emph{different trees}, even though they have the same value. Formulas are like this too: $A\wedge B$ and $B\wedge A$ are different formulas.
+\end{itemize}
+\begin{try}
+\begin{enumerate}
+\item Write \code{countNums : Expr → Nat}, which counts only the \code{num} leaves. Check \code{countNums (plus (num 1) (neg (num 2)))} gives \code{2}.
+\item Compute \code{height} of \code{times (plus (num 1) (num 2)) (num 3)} \emph{on paper}, then check with \code{\#eval}.
+\item Write \code{subexprs} of \code{neg (plus (num 1) (num 2))} on paper, in order, then check.
+\end{enumerate}
+\end{try}
+\begin{tip}[{If you can do Lesson E, you can do step 1}]
+\code{Formula} is \code{Expr} with: atoms instead of numbers, \code{¬} instead of \code{neg}, and \code{∧ ∨ →} instead of \code{plus}/\code{times}. \code{subformulas} is \code{subexprs}; \code{depth} is \code{height}. The work is in matching \emph{Mileti's} exact definitions, which is why Part~4 comes before Part~5.
+\end{tip}
+
+\subsection{Lesson F: notation, writing trees like math (30 min)}
+Writing \code{plus (num 1) (times (num 2) (num 3))} gets tiring. Notation lets you write \code{num 1 ⊕ num 2 ⊗ num 3}.
+\begin{lean}
+-- (inside namespace Demo, after `open Expr`)
+prefix:75 "−" => Expr.neg
+infixl:65 " ⊕ " => Expr.plus
+infixl:70 " ⊗ " => Expr.times      -- 70 > 65: ⊗ binds tighter than ⊕
+
+#eval num 1 ⊕ num 2 ⊗ num 3
+example : (num 1 ⊕ num 2 ⊗ num 3) = plus (num 1) (times (num 2) (num 3)) := by rfl
+example : (−num 1 ⊗ num 2) = times (neg (num 1)) (num 2) := by rfl
+\end{lean}
+\begin{output}
+Demo.Expr.plus (Demo.Expr.num 1) (Demo.Expr.times (Demo.Expr.num 2) (Demo.Expr.num 3))
+\end{output}
+Grouping to the right with \code{infixr}:
+\begin{lean}
+namespace R
+inductive T where
+  | leaf : Nat → T
+  | arr  : T → T → T
+  deriving Repr, DecidableEq
+infixr:25 " ⇒ " => T.arr
+open T
+example : (leaf 1 ⇒ leaf 2 ⇒ leaf 3) = arr (leaf 1) (arr (leaf 2) (leaf 3)) := by rfl
+end R
+\end{lean}
+\textbf{The rules:}
+\begin{itemize}
+\item \code{prefix:N "sym" => f}: you may write \code{sym x} for \code{f x}.
+\item \code{infixl:N "sym" => f} / \code{infixr:N "sym" => f}: you may write \code{a sym b} for \code{f a b}.
+\item \textbf{Precedence:} a higher \code{N} binds tighter. \code{⊗} at 70 beats \code{⊕} at 65, just as $\times$ beats $+$.
+\item \textbf{Associativity:} with several in a row, \code{infixl} groups from the left, $(a\oplus b)\oplus c$, and \code{infixr} groups from the right, $a\Rightarrow(b\Rightarrow c)$.
+\item \textbf{Test notation with \code{example … := by rfl}}: write the notation on the left and the constructor form on the right. If the test passes, the notation parses the way you meant.
+\end{itemize}
+\begin{warn}[Choose new symbols for your formulas]
+Lean already uses \code{¬ ∧ ∨ →} for its \emph{own} logic. If you reuse them, your notation clashes with Lean's. Pick different symbols, for example \code{∼ ⋀ ⋁ ⟶} (tested; they work). If Lean says \code{unexpected token}, the symbol is taken or clashes; pick another.
+\end{warn}
+
+% ------------------------------------------------------------------
+\section{Read Mileti with a purpose (45--60 minutes)}
+Read \textbf{Ch.~2} (generating systems, especially ``freely generated'' and definitions by recursion) and \textbf{§3.1} (the definition of formulas). Keep a notes page and answer these questions. Write the answers in today's diary entry.
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Which connectives are primitive in §3.1?} The project's design assumes $\neg,\wedge,\vee,\to$. Check it. Is $\leftrightarrow$ a primitive or an abbreviation? Is there a $\bot$ symbol? \emph{Only primitives become constructors.}
+\item \textbf{What are the atoms?} Mileti uses a set $P$. Is $P$ fixed, countable, arbitrary? This affects Part~5, Step 1 (\code{Nat} vs.\ \code{String}).
+\item \textbf{How does Mileti define the subformulas of a formula?} Write the definition and section number. Is the result a set?
+\item \textbf{Does Mileti define depth or height (or a similar measure)?} Write the definition. Is an atom 0 or 1?
+\item \textbf{In your own words: why is an inductive type a free generating system?} Use Part~1.2 of this guide. Write 4--6 sentences.
+\end{enumerate}
+\begin{tip}[Why question 5 matters]
+It's ready-made material for your statement of purpose and interviews: ``Formalizing Mileti's syntax in Lean made me see why unique readability is needed for strings but automatic for inductive types…'' Write it carefully.
+\end{tip}
+
+% ------------------------------------------------------------------
+\section{Build \texttt{Syntax.lean}, one small step at a time}
+Open \code{lean/MiletiLogic/Syntax.lean}. It already contains a checklist comment and an empty namespace. Keep the checklist and tick items as you go (change \code{[ ]} to \code{[x]}). Write all code \textbf{between} \code{namespace MiletiLogic} and \code{end MiletiLogic}.
+
+\begin{okbox}[After every step]
+\begin{enumerate}
+\item Save (⌘S).
+\item The editor has no red underlines and the infoview shows no errors.
+\item In Terminal: \code{cd \textasciitilde/Desktop/grad-school-project/mileti-kg-prover/lean \&\& ~/.elan/bin/lake build} prints \code{Build completed successfully}.
+\item Commit (Part~6.2).
+\end{enumerate}
+\end{okbox}
+
+\subsection{Step 1: decide how atoms are named (10 min)}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Option} & \textbf{An atom looks like} & \textbf{Good} & \textbf{Less good}\\
+\midrule
+\code{Nat} & \code{atom 0}, \code{atom 1} & Simplest; easy to make many atoms; easy proofs & The Python harness writes \code{A}, \code{B}, so the export needs a mapping (A→0, B→1)\\
+\code{String} & \code{atom "A"} & Matches the Python harness exactly & Slightly clunkier to type\\
+\bottomrule
+\end{tabularx}
+\end{center}
+Choose one. \textbf{Write a comment above your type explaining why.} The reason matters more than the choice, and you'll need it in your diary.
+
+\subsection{Step 2: write \texttt{inductive Formula} (20--30 min)}
+Model it on \code{Expr} from Lesson E:
+\begin{itemize}
+\item one constructor for \textbf{atoms}, carrying a \code{Nat} or \code{String} (like \code{num});
+\item one for \textbf{¬}, carrying one \code{Formula} (like \code{neg});
+\item one each for \textbf{∧}, \textbf{∨}, \textbf{→}, carrying two \code{Formula}s (like \code{plus});
+\item \code{deriving DecidableEq, Repr};
+\item a comment with the Mileti section it follows.
+\end{itemize}
+Name constructors clearly, for example \code{atom}, \code{not}, \code{and}, \code{or}, \code{imp}.
+\begin{okbox}
+\begin{enumerate}
+\item With \code{\#eval}, build $(A\wedge B)\to(A\vee B)$ \emph{using constructors only} (no notation yet) and look at the printed tree. Does it have the shape of the tree in Part~1.2?
+\item Add \code{example : <your first atom> ≠ <your second atom> := by decide}.
+\item Add \code{example : <A ∧ B as constructors> ≠ <B ∧ A as constructors> := by decide}.
+\end{enumerate}
+\end{okbox}
+\begin{tip}[Names]
+Names like \code{not}, \code{and}, \code{or} are fine as constructor names (tested: they don't clash after \code{open Formula}).
+\end{tip}
+\textbf{Commit now.} This is your first real milestone.
+
+\subsection{Step 3: notation (30--45 min)}
+Following Lesson F:
+\begin{itemize}
+\item one symbol each for ¬, ∧, ∨, → (new symbols, not Lean's own);
+\item precedences that match the Python harness, so the same text means the same formula on both sides:
+\textbf{¬ binds tightest, then ∧, then ∨, then → loosest}, and \textbf{→ groups to the right} (\code{infixr}).
+\end{itemize}
+\begin{okbox}[Three precedence tests]
+Write one \code{example … := by rfl} for each, with notation on the left and the constructor form on the right:
+\begin{enumerate}
+\item $\neg A\wedge B$ is $(\neg A)\wedge B$, not $\neg(A\wedge B)$.
+\item $A\wedge B\vee C$ is $(A\wedge B)\vee C$.
+\item $A\to B\to C$ is $A\to(B\to C)$.
+\end{enumerate}
+If a test fails, your precedence numbers or \code{infixl}/\code{infixr} choice is wrong. Good: the test caught it.
+\end{okbox}
+
+\subsection{Step 4: \texttt{subformulas} (20--30 min)}
+Write \code{subformulas : Formula → List Formula}, modelled on \code{subexprs}, matching Mileti's definition (Part~4, question 3).
+\begin{okbox}
+Take $\varphi = \neg(A\wedge B)\to A$.
+\begin{enumerate}
+\item On paper, list its subformulas in the order your function will produce them.
+\item \code{\#eval subformulas φ} and compare.
+\item Count them; add \code{example : (subformulas φ).length = <your count> := by rfl}.
+\end{enumerate}
+\end{okbox}
+\textbf{Decision to record:} $A$ appears twice in $\varphi$. Does your list keep duplicates? Does Mileti's definition give a set? Write your choice and reason in a comment. (\code{.eraseDups} gives set-like behaviour if you want it.)
+
+\subsection{Step 5: \texttt{depth} (15--20 min)}
+Write \code{depth : Formula → Nat}, modelled on \code{height}, matching Mileti's definition (Part~4, question 4). If the book doesn't define one, use height with atoms at 0 and say so in a comment.
+\begin{okbox}
+Compute by hand, then add an \code{example … := by rfl} for: an atom; $\neg A$; $(A\wedge B)\to(A\vee B)$; $\neg\neg\neg A$.
+\end{okbox}
+
+\subsection{Step 6: clean up (15 min)}
+\begin{itemize}
+\item The comment at the top says what's in the file, with Mileti section references, and the checklist is ticked.
+\item Each decision (atoms, symbols, list vs.\ set, depth convention) has a one-line comment with its reason.
+\item There's no \code{sorry} anywhere. (\code{sorry} means ``unfinished'' to Lean.)
+\item \code{lake build} passes.
+\end{itemize}
+
+% ------------------------------------------------------------------
+\section{Finish: checklist and git}
+
+\subsection{``Done'' checklist for step 1}
+\begin{itemize}[label=□]
+\item \code{Formula} with atoms and ¬ ∧ ∨ →, \code{deriving DecidableEq, Repr}
+\item Atom choice explained in a comment
+\item Notation with three passing precedence tests
+\item \code{subformulas}, checked by hand on one formula, duplicates decision recorded
+\item \code{depth}, checked by hand on four formulas
+\item At least two \code{≠ … := by decide} tests
+\item \code{lake build} passes, no \code{sorry}
+\item Committed and pushed; diary entries for each working day
+\end{itemize}
+
+\subsection{Committing and pushing}
+A \textbf{commit} saves a snapshot of your work in git's history; \textbf{push} uploads it to GitHub. From the project folder:
+\begin{shell}
+cd ~/Desktop/grad-school-project/mileti-kg-prover
+git status                                   # what changed? (red = not staged)
+git add lean/MiletiLogic/Syntax.lean         # stage your file
+git commit -m "Syntax: Formula type with atoms and ¬ ∧ ∨ →"
+git push                                     # upload to GitHub
+\end{shell}
+\begin{tip}[Good commit messages]
+Say \emph{what} changed: ``Syntax: notation with precedence tests'', ``Syntax: subformulas and depth''. Commit after each step in Part~5. Many small commits are visible evidence of steady, independent work, and admissions readers can see them on GitHub.
+\end{tip}
+\begin{okbox}
+Open \code{github.com/ZaDrMeister/mileti-kg-prover} in a browser; your commit message appears at the top of the file list.
+\end{okbox}
+
+% ------------------------------------------------------------------
+\section{When something goes wrong}
+
+\subsection{Real Lean error messages}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.3cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{You see} & \textbf{It means} & \textbf{Fix}\\
+\midrule
+\code{Missing cases: …} & A function doesn't handle every constructor & Add a line for each constructor listed\\
+\code{failed to synthesize Decidable (…)} & Lean can't decide this equality & Add \code{deriving DecidableEq} to the type\\
+\code{Unknown identifier `atom`} & The name isn't in scope & Write \code{Formula.atom}, or add \code{open Formula}\\
+\code{unexpected token} at your symbol & The symbol is already used or clashes & Choose another symbol\\
+\code{Tactic `rfl` failed: The left-hand side … is not definitionally equal to the right-hand side} & The two sides are different trees & Check precedence, or redo your hand calculation\\
+Infoview empty, nothing happens & Lean is starting, or you opened the wrong folder & Wait 30 s; make sure you opened the \code{lean} folder\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{How to ask for help (from Claude or a person)}
+Paste three things:
+\begin{enumerate}
+\item the code (the smallest piece that shows the problem);
+\item the \emph{full} error message;
+\item what you expected to happen.
+\end{enumerate}
+Then ask ``What does this error mean?'' or ``Give me a hint.'' Not ``fix it''. You need to be able to explain every line of this file.
+
+\subsection{References}
+\begin{itemize}
+\item \emph{Functional Programming in Lean} (lean-lang.org): the most beginner-friendly; read the chapters on structures, datatypes and pattern matching.
+\item \emph{Theorem Proving in Lean 4} (lean-lang.org): chapters ``Inductive Types'' and ``Induction and Recursion''.
+\item Avigad, \emph{Logic and Proof}, ch.~4 ``Propositional Logic in Lean'': connects natural deduction and Lean.
+\item For step 2: \emph{Intuitionistic Propositional Logic in Lean} (arXiv 2410.23765) encodes a proof system as an inductive type with one constructor per rule, the same pattern you'll use.
+\end{itemize}
+
+% ------------------------------------------------------------------
+\section{Your research diary}
+At the end of every working day:
+\begin{shell}
+cd ~/Desktop/grad-school-project/mileti-kg-prover
+./diary/new-entry.sh          # creates diary/entries/YYYY-MM-DD.md
+\end{shell}
+Open the file and fill in: goal, what you did, evidence (commits, outputs), what you learned, \textbf{decisions and why}, open questions (open questions marked with a question mark, resolved ones with ✓), AI help used, and the next step. Then commit it:
+\begin{shell}
+git add diary && git commit -m "Diary: 2026-11-26" && git push
+\end{shell}
+\textbf{What to write for step 1:}
+\begin{itemize}
+\item Day 1: setup problems and how you solved them; anything in Lessons A--C that surprised you.
+\item Day 2: your answers to the five Mileti questions (Part~4), especially question 5.
+\item Day 3: your decisions (atoms, symbols, list vs.\ set, depth) with reasons; the commits you made.
+\end{itemize}
+
+% ------------------------------------------------------------------
+\section{Self-test and next steps}
+
+\subsection{Can you explain these without notes?}
+If you can, you're ready for step 2. They're also likely interview questions.
+\begin{enumerate}
+\item What does \code{inductive} do, and why does it give unique readability for free?
+\item Why does Lean accept \code{size} calling itself?
+\item What do \code{deriving DecidableEq} and \code{deriving Repr} each do, and why does the project need \code{DecidableEq}?
+\item What's the difference between \code{by rfl} and \code{by decide}?
+\item Why did you choose your precedences, and how do you know they're right?
+\item Are your subformulas a list or a set, and why?
+\end{enumerate}
+
+\subsection{Step 2 preview: \texttt{Deduction.lean}}
+Next you'll write
+\begin{center}\code{inductive Derivable : List Formula → Formula → Prop}\end{center}
+with \textbf{one constructor per rule} from \code{docs/design.md} §3. It's the same \code{inductive} idea, but instead of describing what a formula \emph{is}, the type describes what can be \emph{derived}: \code{Derivable S φ} is the Lean version of ``$S\vdash\varphi$ has a deduction.'' You'll start with Assume, ∧EL, ∧ER, ∧I, →E and →I, and prove the first book item, $A\wedge B\vdash A\vee B$ (which also needs ∨IL). A separate guide will come when step 1 is done.
+
+\end{document}

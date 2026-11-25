@@ -26,3 +26,5 @@ runs/
 kg/extracted/*.jsonl
 kg/extracted/oracle/
 lean/Scratch.lean
+!docs/guides/step1-guide.pdf
+*.toc
