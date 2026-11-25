@@ -10,7 +10,7 @@ The research question: how much does each layer help a small model and a strong 
 
 **Status (Nov 2026):** early work. The scaffold and design are done, and the Lean formalization is next. **Start here:** [`docs/STEP-1-GUIDE.md`](docs/STEP-1-GUIDE.md). Related work: [`docs/related-work.md`](docs/related-work.md).
 
-**Who wrote what:** the Lean syntax and deduction rules, the PDDL domain and the hand-written knowledge graph are written by hand by the author (Dren Zabeli). The Python harness scaffold and the planning documents were drafted with AI assistance. The LLM-extracted graph (condition D) is AI-built by design and is not in the public repo.
+**Who wrote what:** the Lean syntax and the 14 deduction rules, and the Python rule gates, are written by hand by the author (Dren Zabeli). The knowledge graph is LLM-extracted by design: the experiment asks whether *automatically built* book knowledge helps. It stays out of the public repo because it paraphrases the whole book. The Python harness scaffold and the planning documents were drafted with AI assistance.
 
 ## Layout
 
@@ -18,8 +18,9 @@ The research question: how much does each layer help a small model and a strong 
 |---|---|---|
 | `lean/MiletiLogic/Syntax.lean` | Formulas (Ch. 2, §3.1) | **you** |
 | `lean/MiletiLogic/Deduction.lean` | The 14 rules of §3.4: the gate | **you** |
-| `pddl/domain.pddl` | Rules as PDDL actions (`assume` is given as a template) | **you** |
-| `kg/` | Knowledge graph of Ch. 1–3 (3 example nodes) | **you** |
+| `harness/` gates | One Python gate per rule, used as the engine's legal-move check | **you** |
+| `pddl/domain.pddl` | Optional PDDL export, for shortest-proof search only | optional |
+| `kg/extracted/` | LLM-extracted knowledge graph of Ch. 1–3 (kept local) | AI-built |
 | `benchmark/book_items.jsonl` | The 9 object-level deductions in Ch. 2–3 | done |
 | `harness/` | Parser, truth tables, LLM interface, Lean gate runner | scaffold |
 | `tests/` | Smoke tests | scaffold |

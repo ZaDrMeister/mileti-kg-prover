@@ -2,7 +2,7 @@
 
 These notes come from a web search. They are based on abstracts and snippets only, so **read each paper before you cite it**, and check the venue, the year and the numbers.
 
-The project: an LLM builds deductions in Mileti's §3.4 proof system one rule at a time. A PDDL domain gives the legal moves, a knowledge graph gives strategy, and a hand-written Lean formalization checks each step.
+The project: an LLM builds deductions in Mileti's §3.4 proof system one rule at a time. Hand-written rule gates give the legal moves, an LLM-extracted knowledge graph gives strategy, and a hand-written Lean formalization checks each step.
 
 ## 1. LLMs writing proofs in a propositional proof system (closest to the core)
 | Work | What it does | How it relates |
@@ -28,7 +28,7 @@ No benchmark turned up of **generated sequents graded in a textbook's own proof 
 ## 3. Knowledge graphs and retrieval for provers
 | Work | Notes |
 |---|---|
-| **KG-Prover** ([arXiv 2503.11657](https://arxiv.org/html/2503.11657v2)) | LLM traverses a ProofWiki knowledge graph (60k+ nodes); informal proof → autoformalized → Lean. Graph depth used as test-time compute. **Your main graph comparison** (theirs: large and extracted; yours: small, hand-written, strategy-level) |
+| **KG-Prover** ([arXiv 2503.11657](https://arxiv.org/html/2503.11657v2)) | LLM traverses a ProofWiki knowledge graph (60k+ nodes); informal proof → autoformalized → Lean. Graph depth used as test-time compute. **Your main graph comparison** (theirs: large and retrieved from ProofWiki; yours: small, LLM-extracted from one textbook, strategy-level) |
 | **LeanDojo / ReProver** ([arXiv 2306.15626](https://arxiv.org/pdf/2306.15626)) | Standard retrieval-augmented prover: 51.2% vs 47.6% without retrieval |
 | **Premise selection with graph structure** ([arXiv 2510.23637](https://arxiv.org/pdf/2510.23637)) | Text plus a graph neural network over dependencies; better than ReProver retrieval |
 | **DAPS** ([arXiv 2610.41536](https://arxiv.org/pdf/2610.41536)) | Dependency-aware premise selection |
@@ -76,7 +76,7 @@ No paper was found that gives an LLM prover the legal moves at each step for nat
 ## Where your project is new (tentative)
 1. A **textbook's own proof system** (Mileti §3.4), formalized by hand as the gate, rather than Lean tactics or a made-up notation.
 2. **Legal moves from PDDL** as a separate layer you can switch on and off.
-3. A **small hand-written strategy graph vs. an LLM-extracted one**, with an oracle condition. KG-Prover uses a large extracted graph and has no oracle.
+3. An **LLM-extracted strategy graph vs. a strategy oracle**, crossed with the legal-moves layer. Nabi et al. already compared an extracted graph against no graph, so the new part is the oracle and the interaction with legal moves. *(The hand-written arm was dropped on 2026-11-25.)*
 4. A **failure taxonomy** as the main contribution.
 
 ## Read first

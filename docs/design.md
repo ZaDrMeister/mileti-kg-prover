@@ -88,7 +88,7 @@ Working backward, most rules' premises are fixed by the goal: ∧I, ∨IL, ∨IR
 
 ## 5. Knowledge graph (the "semantics": what the book means)
 
-**Decision (builder's call, author may override):** author **hand-writes** the graph (learning + it's the main condition). As a comparison condition, the competition's extraction pipeline produces a second, **LLM-extracted** graph from the same chapters.
+**Decision (author, 2026-11-25):** the graph is **LLM-extracted only** (`kg/extracted/`, built with the competition's extraction pipeline). The author writes the Lean rules and the gates, nothing else. There is no hand-written graph and no condition C. The node types below describe the extracted graph.
 
 Node types:
 
@@ -118,7 +118,7 @@ The book has only about 9 object-level deductions in Ch. 2–3. These are the 6 
 |---|---|
 | A. LLM alone | Goal and rule list; Lean feedback |
 | B. + PDDL | A, plus the legal-move list at each step |
-| C. + PDDL + KG (hand-written) | B, plus knowledge-graph queries |
+| ~~C. + hand-written KG~~ | Dropped 2026-11-25: there is no hand-written graph |
 | D. + PDDL + KG (extracted) | B, plus the LLM-built graph |
 | E. Oracle | B, plus the right strategy given up front |
 
@@ -144,7 +144,7 @@ Use paired McNemar tests between conditions, as in the calculus study.
 - Backward proof search, with formula arguments drawn from a finite candidate set (§4.1–4.2).
 - Lean 4 v4.28.0 (already installed); no Mathlib.
 - Python 3 standard library for orchestration; an LLM provider interface with no keys yet.
-- Knowledge graph: hand-written first, with the extracted graph as a comparison condition.
+- Knowledge graph: LLM-extracted only (author's decision, 2026-11-25).
 - Benchmark: book items as a development set, generated sequents as the main set.
 - PDDL is checked by a small Python checker of preconditions. A real planner such as Fast Downward is optional, used only to compute the shortest proof.
 

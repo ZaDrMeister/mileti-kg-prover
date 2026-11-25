@@ -1,6 +1,6 @@
 # Knowledge graph: what the book means (Mileti Ch. 1–3)
 
-You write this by hand, in your own words, with a section reference for each entry. Don't paste book text.
+**Superseded (2026-11-25):** there is no hand-written graph. The experiment uses the LLM-extracted graph in `kg/extracted/`. The files here are only format examples.
 
 - `nodes.jsonl`: one node per line: `{"id", "type", "title", "text", "ref"}`
 - `edges.jsonl`: one edge per line: `{"src", "dst", "rel"}`
