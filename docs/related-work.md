@@ -76,6 +76,7 @@ No paper was found that gives an LLM prover the legal moves at each step for nat
 ## Where your project is new (tentative)
 1. A **textbook's own proof system** (Mileti §3.4), formalized by hand as the gate, rather than Lean tactics or a made-up notation.
 2. **Legal moves from PDDL** as a separate layer you can switch on and off.
+2b. **Whole proof first (W) vs. move by move with legal moves (B)**, on the same gates: a direct test of what the legal-move layer adds over ProofGrid-style one-shot proving.
 3. An **LLM-extracted strategy graph vs. a strategy oracle**, crossed with the legal-moves layer. Nabi et al. already compared an extracted graph against no graph, so the new part is the oracle and the interaction with legal moves. *(The hand-written arm was dropped on 2026-11-25.)*
 4. A **failure taxonomy** as the main contribution.
 

@@ -121,6 +121,9 @@ The book has only about 9 object-level deductions in Ch. 2–3. These are the 6 
 | ~~C. + hand-written KG~~ | Dropped 2026-11-25: there is no hand-written graph |
 | D. + PDDL + KG (extracted) | B, plus the LLM-built graph |
 | E. Oracle | B, plus the right strategy given up front |
+| W. Whole proof first | Goal and rule list. The LLM writes the **entire** deduction (numbered lines: sequent, rule, premise lines, extra formulas) in one answer. Then the gates check it **line by line, in order**, and record for each line: accepted, or which side condition failed. No legal-move list and no feedback during writing |
+
+**Why W (added 2026-11-25, author's decision):** it compares *planning the whole proof* with *building it move by move with legal moves* (B). W is close to ProofGrid's one-shot setup, so W vs. B measures what the per-step legal-move layer adds over the standard approach. W uses the same gates and the same Lean export; the only new code is a replay function that feeds the lines to the gates in order. Metrics for W: proofs fully accepted, **first failing line** (position and type), and how many lines are valid after the first error. *Optional later:* W+R, which sends the first gate error back for one repair round. 'Repair, Retry' (arXiv 2610.22698) found that feedback like this often doesn't beat resampling, so treat it as secondary.
 
 Models: one small local model and one strong API model. Use at least 3 seeds and a fixed step budget.
 

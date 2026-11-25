@@ -16,6 +16,8 @@ This is a quick guide to each milestone: what to build, what to understand first
 | M7 | Lean verifier | Jan 31–Feb 13 | Python + Lean | Every trace Python accepts also passes Lean |
 | M8 | Benchmark + pilot | Feb 14–Mar 6 | Python | 200 generated items; the oracle beats no help in a pilot |
 | M9 | Full experiment | Mar 7–Apr 17 | Python | All conditions × 2 models × 3 seeds; analysis done |
+
+*Added 2026-11-25:* condition **W** (whole proof first, then gates line by line; design §7). Before M8, write `replay(lines) -> list[verdict]`. It reuses your gates and stops recording acceptance after the first failure but keeps checking later lines. About 2–3 hours of extra work.
 | M10 | Paper | Apr 18–Jun | LaTeX | A workshop draft plus an arXiv preprint |
 
 **For applications in December:** by then M3–M4 are done. That's enough to describe the project as "a working proof world in which every textbook deduction replays; Lean verifier in progress".
