@@ -57,10 +57,7 @@ cd ~/Desktop/grad-school-project/mileti-kg-prover/lean
 5. Open the **infoview**: ⇧⌘P → type `Lean 4: Infoview: Toggle`. A panel opens on the right. That's where Lean "talks" to you: results, errors and goals.
 
 ### 1.3 Make a scratch file for practice
-Create `lean/Scratch.lean` (File → New File, save it in the `lean` folder). You'll practise there. It's **not** part of the project, so tell git to ignore it. Add this line to the project's `.gitignore`:
-```
-lean/Scratch.lean
-```
+Create `lean/Scratch.lean` (File → New File, save it in the `lean` folder). You'll practise there. It's **not** part of the project; `.gitignore` already contains `lean/Scratch.lean`, so git ignores it.
 Test it by typing into Scratch.lean:
 ```lean
 #eval 2 + 3
@@ -316,7 +313,7 @@ From the project folder:
 ```bash
 cd ~/Desktop/grad-school-project/mileti-kg-prover
 git status                                  # see what changed
-git add lean/MiletiLogic/Syntax.lean .gitignore
+git add lean/MiletiLogic/Syntax.lean
 git commit -m "Syntax: Formula type with atoms and ¬ ∧ ∨ →"
 git push
 ```
