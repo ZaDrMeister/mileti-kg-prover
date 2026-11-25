@@ -2,8 +2,8 @@
 
 An LLM builds formal deductions in propositional logic using the proof system of Mileti, *A Mathematical Introduction to Mathematical Logic*, §3.4. At each step:
 
-- **PDDL** says which rules are legal right now.
-- A **knowledge graph** of the book explains what things mean and which strategy to use.
+- **Rule gates** (hand-written, one per rule) say which moves are legal right now.
+- An **LLM-extracted knowledge graph** of the book explains what things mean and which strategy to use.
 - **Lean** checks every step.
 
 The research question: how much does each layer help a small model and a strong model? See [`docs/design.md`](docs/design.md).
@@ -29,8 +29,8 @@ The research question: how much does each layer help a small model and a strong 
 
 1. `Syntax.lean`: the `Formula` type.
 2. `Deduction.lean`: `Derivable` with one constructor per rule. Prove the 9 book items as Lean `example`s.
-3. `domain.pddl`: the other 13 actions, mirroring your Lean constructors.
-4. `kg/`: about 30 nodes (the 14 rules, the §3.4 worked examples, definitions, strategies, pitfalls).
+3. Python gates: one per rule, mirroring your Lean constructors (see `docs/MILESTONES.md`).
+4. The knowledge graph is already extracted (`kg/extracted/`, local only); there's nothing to write.
 5. `checkStep` in Lean, then the Python loop (`harness/loop.py`).
 6. Benchmark generator, then experiments (design §6–7).
 
