@@ -7,7 +7,7 @@ The project: an LLM builds deductions in Mileti's §3.4 proof system one rule at
 ## 1. LLMs writing proofs in a propositional proof system (closest to the core)
 | Work | What it does | How it relates |
 |---|---|---|
-| **ProofGrid** ([MathNLP 2025](https://preview.aclanthology.org/ingest-emnlp/2025.mathnlp-main.14.pdf)) | Models write, check, repair and gap-fill proofs in a minimal **natural-deduction language** for propositional logic | **Closest benchmark.** Compare its task design with yours. Your difference is that the rules come from a textbook, the checker is in Lean, and the PDDL and graph layers are ablated |
+| **ProofGrid**: Arkoudas & Batzoglou, EMNLP 2025 Findings; extended version [arXiv 2605.12524](https://arxiv.org/abs/2605.12524) *(verified 2026-11-25; the MathNLP link in the first draft was a different paper)* | Randomly generated, SAT-filtered propositional problems; proofs in an assumption-style natural-deduction language (NDL); a mechanical checker that reports the **first error**, with a **6-type error taxonomy**; finds that strong models fail cosmetically and weak ones structurally. One-shot: no legal-move lists, no step feedback | **Closest prior work, and it already has a generated benchmark and a failure taxonomy.** Position your taxonomy against its 6 types |
 | **Magalhães & Sandes** ([ENIAC](https://sol.sbc.org.br/index.php/eniac/article/download/46915/46672/)) | External natural-deduction and tableau checkers grade open-LLM proofs, propositional and FOL | Reports models **skipping intermediate checks**, an early data point for your failure taxonomy |
 | **Learn from Failure / PropL** ([arXiv 2404.07382](https://arxiv.org/html/2404.07382v3)) | Intuitionistic propositional theorems in Lean; fine-tuning on trial-and-error search traces | Uses Lean as the gate, but with tactics rather than textbook rules; a good baseline to discuss |
 | **Can LLMs learn formal logic?** ([arXiv 2504.20213](https://arxiv.org/pdf/2504.20213)) | Training and evaluation framework for formal logic proofs | Check its proof format and checker |
@@ -37,12 +37,22 @@ No benchmark turned up of **generated sequents graded in a textbook's own proof 
 
 Your oracle ablation from the calculus study (content vs. the cost of fetching it) matches a question this line of work mostly doesn't ask.
 
+## 3b. Added after verification (2026-11-25)
+| Work | Notes |
+|---|---|
+| **When Does Structured Knowledge Help Neural Theorem Proving?** (Nabi, Vogl, Nabi, [arXiv 2609.34460](https://arxiv.org/abs/2609.34460)) | MathKG: 364 Mathlib theorems with LLM-extracted typed edges; no KG vs KG vs retrieval vs both, across 5 models in Lean 4. **The KG helps small models and hurts large ones**; an oracle that picks the best mode per problem solves 6–58% more. **Closest to your KG conditions.** No hand-written arm, and its oracle picks a mode rather than giving the strategy |
+| **Tithi et al.** ([arXiv 2505.04736](https://arxiv.org/abs/2505.04736)) | 358 propositional proofs from a logic tutoring system; LLM accuracy measured step by step |
+| **Magalhães, Sandes et al.** (ENIAC 2026, [page](https://sol.sbc.org.br/index.php/eniac/article/view/46915)) | Open LLMs write natural-deduction and tableau proofs, checked externally; the rules are given in the prompt, but there are no legal-move lists at each step. Full text not read |
+| **palmskog/fitch** | Coq/HOL4 checker for the Fitch system of Huth & Ryan's textbook. No LLM; a precedent for formalizing a textbook's proof system |
+
+No paper was found that gives an LLM prover the legal moves at each step for natural deduction, or that uses STRIPS/PDDL proof planning with an LLM.
+
 ## 4. Verifier feedback at each step, and failure analysis
 | Work | Notes |
 |---|---|
-| **LeanListener** ([arXiv 2503.09730](https://arxiv.org/html/2503.09730v2)) | Lean feedback on each tactic used as an RL reward. Many failures are tactics that **don't apply to the current state**, which is exactly what your PDDL "legal moves" layer targets |
+| **Local Look-Ahead Guidance via Verifier-in-the-Loop** ("LeanListener", [arXiv 2503.09730](https://arxiv.org/html/2503.09730v2)) | Trains a tactic generator with Lean rewards on each step. Says, without a number, that "many" failures are tactics that don't apply to the current state or have bad syntax | Qualitative support for a legal-moves layer |
 | **ReCent-Prover** ([arXiv 2604.19558](https://arxiv.org/pdf/2604.19558)) | Reflection on misapplied tactics in Rocq; some misapplications cause no error at all |
-| **Repair, Retry, and the Cost of Hindsight** ([arXiv 2610.22698](https://arxiv.org/pdf/2610.22698)) | Prompt-based verifier feedback in Lean. Read this one: it may overlap with your condition A |
+| **Repair, Retry, and the Cost of Hindsight** ([arXiv 2610.22698](https://arxiv.org/pdf/2610.22698)) | Whole-proof repair in Lean on 167 MiniF2F problems. Verifier feedback does **not** beat resampling with instructions only, and showing the failed proof makes models copy it. Relevant to how condition A returns Lean errors |
 | **Analogical retrieval + symbolic verification, Euclidean geometry** ([arXiv 2505.14479](https://arxiv.org/pdf/2505.14479)) | Links to your spring 2026 geometry proposal |
 | seL4 ([arXiv 2602.08384](https://arxiv.org/pdf/2602.08384)), code agents ([arXiv 2607.06341](https://arxiv.org/pdf/2607.06341)), ([NSF PAR](https://par.nsf.gov//servlets/purl/10599675)) | Formats for returning verifier errors to the model |
 

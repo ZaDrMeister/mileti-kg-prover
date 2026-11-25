@@ -127,4 +127,4 @@ Small, frequent commits are the evidence that you did this work. Commit after ea
 
 ## 8. Next session
 
-`Deduction.lean`: `inductive Derivable : List Formula → Formula → Prop` with one constructor per rule (the table in `docs/design.md` §3). Start with **Assume, ∧EL, ∧ER, ∧I, →E, →I**, then prove the first book item, `A ∧ B ⊢ A ∨ B` (it needs ∨IL as well). For the encoding pattern, read §3 of *Intuitionistic Propositional Logic in Lean* (arXiv 2410.23765), which encodes a different system the same way.
+`Deduction.lean`: `inductive Derivable : List Formula → Formula → Prop` with one constructor per rule (the table in `docs/design.md` §3). Start with **Assume, ∧EL, ∧ER, ∧I, →E, →I**, then prove the first book item, `A ∧ B ⊢ A ∨ B` (it needs ∨IL as well). For the encoding pattern, read how *Intuitionistic Propositional Logic in Lean* (arXiv 2410.23765) encodes its Hilbert system as an inductive type with one constructor per axiom and rule. That is the same pattern, used on a different system.
