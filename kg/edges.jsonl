@@ -1,0 +1,2 @@
+{"src": "strategy:goal-implication", "dst": "rule:impI", "rel": "strategy_for"}
+{"src": "pitfall:impI-last", "dst": "rule:impI", "rel": "pitfall_of"}

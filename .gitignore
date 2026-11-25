@@ -1,0 +1,27 @@
+# Book and anything extracted from it stay local (copyright)
+*.pdf
+book_text/
+# Lean build output
+lean/.lake/
+lean/Generated/
+# Python
+__pycache__/
+*.pyc
+.venv/
+# Secrets and run output
+.env
+runs/
+.DS_Store
+!docs/handout/research-plan.pdf
+# LaTeX build files
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+
+# AI-extracted paraphrase of the whole book (condition D): keep local
+kg/extracted/*.jsonl
+kg/extracted/oracle/

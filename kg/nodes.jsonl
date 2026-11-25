@@ -1,0 +1,3 @@
+{"id": "rule:impI", "type": "rule", "title": "→I (implication introduction)", "text": "If you can prove psi after adding phi as the last assumption, you can prove phi → psi without it.", "ref": "§3.4"}
+{"id": "strategy:goal-implication", "type": "strategy", "title": "Goal is an implication", "text": "When the goal is phi → psi, apply →I: assume phi at the end of the list and prove psi.", "ref": "§3.4"}
+{"id": "pitfall:impI-last", "type": "pitfall", "title": "→I removes only the last assumption", "text": "If phi is in the list but not last, use Reorder to move it to the end first.", "ref": "§3.4"}

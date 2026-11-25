@@ -1,0 +1,9 @@
+{"id": "ex-3.4-a", "ref": "§3.4 worked example", "assumptions": ["A & B"], "goal": "A | B"}
+{"id": "ex-3.4-b", "ref": "§3.4 worked example (also Prop. 3.4.6)", "assumptions": ["~A", "A | B"], "goal": "B"}
+{"id": "ex-3.4-c", "ref": "§3.4 worked example", "assumptions": ["A | (B & C)"], "goal": "(A | B) & (A | C)"}
+{"id": "ex-3.4-d", "ref": "§3.4 worked example (de Morgan direction)", "assumptions": ["~A | ~B"], "goal": "~(A & B)"}
+{"id": "ex-3.4-e", "ref": "§3.4 worked example (excluded middle)", "assumptions": [], "goal": "A | ~A"}
+{"id": "ex-3.7-7", "ref": "Exercise 3.7 #7", "assumptions": ["A"], "goal": "~~A"}
+{"id": "ex-3.7-8a", "ref": "Exercise 3.7 #8a", "assumptions": ["~A"], "goal": "~(A & B)"}
+{"id": "ex-3.7-8b", "ref": "Exercise 3.7 #8b", "assumptions": ["~(A & B)"], "goal": "~A | ~B"}
+{"id": "ex-3.4-f", "ref": "§3.4 (stated, not written out)", "assumptions": ["A1", "A2"], "goal": "A1 & A2"}
