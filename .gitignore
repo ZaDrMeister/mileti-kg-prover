@@ -25,3 +25,4 @@ runs/
 # AI-extracted paraphrase of the whole book (condition D): keep local
 kg/extracted/*.jsonl
 kg/extracted/oracle/
+lean/Scratch.lean

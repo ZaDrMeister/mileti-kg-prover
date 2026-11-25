@@ -8,7 +8,7 @@ An LLM builds formal deductions in propositional logic using the proof system of
 
 The research question: how much does each layer help a small model and a strong model? See [`docs/design.md`](docs/design.md).
 
-**Status (Nov 2026):** early work. The scaffold and design are done, and the Lean formalization is next. **Start here:** [`docs/STEP-1-GUIDE.md`](docs/STEP-1-GUIDE.md). Related work: [`docs/related-work.md`](docs/related-work.md).
+**Status (Nov 2026):** early work. The scaffold and design are done, and the Lean formalization is next. **Start here:** [`docs/STEP-1-GUIDE.md`](docs/STEP-1-GUIDE.md). Research diary: [`diary/`](diary/). Related work: [`docs/related-work.md`](docs/related-work.md).
 
 **Who wrote what:** the Lean syntax and the 14 deduction rules, and the Python rule gates, are written by hand by the author (Dren Zabeli). The knowledge graph is LLM-extracted by design: the experiment asks whether *automatically built* book knowledge helps. It stays out of the public repo because it paraphrases the whole book. The Python harness scaffold and the planning documents were drafted with AI assistance.
 
